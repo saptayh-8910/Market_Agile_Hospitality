@@ -41,3 +41,24 @@ Instead of a simple average, I segmented customers into actionable "Time Windows
 
 ### 3. Visualization Optimization
 * **Sorting Hack:** The query formats months as `'01. January', '02. February'` instead of just `'January'`. This forces the Visualization tool (Looker Studio) to sort months chronologically rather than alphabetically, fixing a common reporting UX issue.
+
+# Setup Instructions
+1. BigQuery Setup:
+- Import your raw booking data (CSV/Sheets) into BigQuery.
+- Create a new Scheduled Query and paste the SQL script from logic/marketing_lead_time.sql.
+
+2. Visualization:
+- Connect Looker Studio to the resulting table.
+- Recommended Chart: Create a "Pivot Table with Heatmap".
+    - Row Dimension: Country
+    - Column Dimension: checkin_month
+    - Metric: bookings_plus_42_days (or other buckets)
+
+3. Analysis:
+- Sort by average_nightly_rate_per_country to prioritize high-revenue regions.
+
+# Contribution
+Contributions are welcome! If you have ideas for better customer segmentation logic, please open an issue.
+
+# Acknowledgment
+Designed to support the Growth Marketing team in optimizing Year-over-Year (YoY) ad spend efficiency.
