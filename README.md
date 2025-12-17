@@ -30,6 +30,7 @@ Below is the updated data flow represented as a mermaid diagram:
 graph LR
     A[Google Sheets] --> |Data Ingestion| B[BigQuery]
     B --> |Data Transformation| C[Looker Studio]
+```
 
 ## The 'Pivot vs. Persevere' Framework
 Marketing insights are driven by grouping lead-time trends into key buckets:
