@@ -24,13 +24,12 @@ The solution is built as an end-to-end pipeline leveraging the following GCP ser
    - These dashboards empower stakeholders with actionable insights by visualizing lead-time trends.
 
 ### Data Flow Summary
-Below is the data flow represented as a mermaid diagram:
+Below is the updated data flow represented as a mermaid diagram:
 
 ```mermaid
-graph RL
-    A[Google Sheets] --> B[BigQuery]
-    B --> C[Looker Studio]
-```
+graph LR
+    A[Google Sheets] --> |Data Ingestion| B[BigQuery]
+    B --> |Data Transformation| C[Looker Studio]
 
 ## The 'Pivot vs. Persevere' Framework
 Marketing insights are driven by grouping lead-time trends into key buckets:
