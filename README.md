@@ -1,49 +1,31 @@
-## Architecture & Automation
+# 🌍 Market Timing & Lead Time Analysis
 
-This project has been upgraded to an Automated Data Pipeline to ensure scalability and performance. By transitioning from static queries to automation, we have significantly reduced query costs and enhanced dashboard responsiveness.
+This module focuses on **Marketing Spend Efficiency**. By analyzing the "Lead Time" (days between booking and arrival) per country, we determine exactly when to launch advertising campaigns for different regions.
 
-### Automated Pipeline Flow
+## 🧠 Business Logic & SQL Techniques
+
+### 1. Data Cleaning (The `COALESCE` Strategy)
+Real-world data often comes with inconsistent date formats (some as timestamps, some as text strings).
+* **The Problem:** Standard date functions fail if the input format changes.
+* **The Solution:** I implemented a robust `COALESCE` logic that attempts to cast the date as a Timestamp first; if that fails (returns NULL), it falls back to parsing it as a specific String format (`%m/%d/%Y`). This ensures 100% data coverage without errors.
+
+### 2. Lead Time Bucketing (Segmentation)
+Instead of a simple average, I segmented customers into actionable "Time Windows" using `CASE WHEN` logic:
+* **Last Minute (0-14 Days):** Targets for "Flash Sales" and urgent inventory clearing.
+* **Short Notice (15-28 Days):** Standard monthly campaigns.
+* **Early Birds (42+ Days):** High-value targets for long-term brand awareness campaigns.
+
+### 3. Visualization Optimization
+* **Sorting Hack:** The query formats months as `'01. January', '02. February'` instead of just `'January'`. This forces the Visualization tool (Looker Studio) to sort months chronologically rather than alphabetically, fixing a common reporting UX issue.
+
+## 📐 Data Pipeline
+
 ```mermaid
 graph LR
-    A[Google Sheets (Raw Booking Data)] --> |Scheduled Query| B[BigQuery (Lead-Time Bucketing + Cleaning)]
-    B --> |Materialized Daily Results| C[Materialized Table]
-    C --> |Live Connection| D[Looker Studio]
+    A["Raw Booking Data<br/>(Mixed Formats)"] -->|Ingest| B("BigQuery<br/>Staging")
+    B -->|SQL Transformation<br/>(Clean & Bucket)| C{BigQuery<br/>Lead Time Logic}
+    C -->|Segmented Data| D("Marketing<br/>Insights View")
+    D -->|Visualizes| E["Looker Studio<br/>Heatmap"]
+    
+    style C fill:#f9f,stroke:#333,stroke-width:2px
 ```
-
-#### Why Automate the Pipeline?
-- **Cost Efficiency**: Reduces query costs by using a materialized table instead of repeatedly querying raw spreadsheets.
-- **Performance Optimization**: Ensures dashboards load instantly by connecting to a dedicated materialized table rather than the raw sheet.
-- **Scalability**: Handles increasing data volumes effortlessly with scheduled tasks and streamlined processing.
-
----
-
-## Data Engineering Logic
-
-The pipeline leverages BigQuery to execute scheduled transformations, materializing results into a dedicated table for quick access.
-
-### SQL Snippet for Data Transformation
-```sql
-CREATE OR REPLACE TABLE project_id.dataset.materialized_table AS
-SELECT
-    SAFE_CAST(COALESCE(raw_lead_time, '0') AS INT64) AS lead_time_bucket,
-    PARSE_DATE('%Y-%m-%d', booking_date_column) AS cleaned_booking_date
-FROM
-    project_id.dataset.raw_table;
-```
-
-#### Value of Scheduled Queries
-The pipeline runs a scheduled query (Cron job) at 6:00 AM daily, acting as a data snapshot to:
-- Track booking behavior trends day-over-day.
-- Maintain versioned snapshots for historical analysis.
-- Guarantee freshly transformed data every morning.
-
----
-
-## Business Value
-
-By automating the pipeline to refresh data at 6:00 AM daily:
-- **Marketing Team Efficiency**: Enables the team to start their day with fresh insights, no waiting for manual processes.
-- **Enhanced Decision-Making**: Provides early signals on lead-time trends to optimize ad spend decisions immediately.
-- **Maximized ROI**: Prevents resource waste by catching booking behavior changes early.
-
-This automated solution is designed for scalability, ensuring the system performs optimally across larger datasets while delivering actionable insights to stakeholders promptly.
