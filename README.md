@@ -2,7 +2,7 @@
 
 This module focuses on **Marketing Spend Efficiency**. By analyzing the "Lead Time" (days between booking and arrival) per country, we determine exactly when to launch advertising campaigns for different regions.
 
-## 🚀 Project Overview
+## Project Overview
 
 The goal of this project is to solve a revenue optimization problem: **"When is the best time to spend marketing budget for each country?"**
 
