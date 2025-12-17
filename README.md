@@ -1,64 +1,49 @@
-# Market-Agile-Hospitality
+## Architecture & Automation
 
-## Executive Summary
-In the fast-paced hospitality industry, marketing agility is critical to staying competitive. The "Market-Agile-Hospitality" project develops a Business Intelligence (BI) pipeline to optimize ad spend decisions based on lead-time trends. By leveraging advanced analytics and a cutting-edge Google Cloud Platform (GCP) stack, marketing teams can decide whether to "Pivot" or "Persevere" with ad campaigns. This ensures optimal allocation of resources and prevents wasted investments in underperforming markets.
+This project has been upgraded to an Automated Data Pipeline to ensure scalability and performance. By transitioning from static queries to automation, we have significantly reduced query costs and enhanced dashboard responsiveness.
 
-## Technical Architecture
-The solution is built as an end-to-end pipeline leveraging the following GCP services:
-
-1. **Source Data: Google Sheets**
-   - Marketing teams input raw data directly into shared Google Sheets.
-   - The sheet acts as the single source of truth for initial data ingestion.
-
-2. **Data Warehouse: BigQuery**
-   - Data from Google Sheets is ingested and transformed in BigQuery.
-   - Data cleaning and transformation utilize SAFE_CAST and COALESCE functions to handle common issues like missing values and datatype mismatches.
-     ```sql
-     SELECT 
-         SAFE_CAST(COALESCE(raw_column, '0') AS INT64) AS cleaned_column 
-     FROM dataset.source_table;
-     ```
-
-3. **Visualization: Looker Studio**
-   - Interactive dashboards and reports are developed in Looker Studio.
-   - These dashboards empower stakeholders with actionable insights by visualizing lead-time trends.
-
-### Data Flow Summary
-Below is the updated data flow represented as a mermaid diagram:
-
+### Automated Pipeline Flow
 ```mermaid
 graph LR
-    A[Google Sheets] --> |Data Ingestion| B[BigQuery]
-    B --> |Data Transformation| C[Looker Studio]
+    A[Google Sheets (Raw Booking Data)] --> |Scheduled Query| B[BigQuery (Lead-Time Bucketing + Cleaning)]
+    B --> |Materialized Daily Results| C[Materialized Table]
+    C --> |Live Connection| D[Looker Studio]
 ```
 
-## The 'Pivot vs. Persevere' Framework
-Marketing insights are driven by grouping lead-time trends into key buckets:
-
-- **0-14 Days**: Immediate bookings (short-term market behavior).
-- **15-28 Days**: Near-future bookings (mid-term trends).
-- **29-42 Days**: Long-term planning (early warning signals for market shifts).
-- **42+ Days**: Strategic foresight (far-out trends impacting advertising budgets).
-
-These lead-time buckets serve as predictive signals to guide decisions:
-- **Pivot**: Explore alternative strategies when lead time trends deviate radically.
-- **Persevere**: Invest confidently in campaigns that maintain predictable booking behaviors.
-
-## Business Impact
-This BI pipeline ensures marketing resources are used effectively by:
-
-1. **Monitoring Market Dynamics**:
-   - Enables real-time tracking of booking behaviors, segmented by lead times.
-
-2. **Preventing Wasted Ad Spend**:
-   - Quickly identifies when booking patterns diverge, signaling a need to cut losses or double down on effective markets.
-
-3. **Improving ROI**:
-   - Boosts overall profitability by refining campaign decisions based on robust data analysis.
-
-By proactively identifying behavioral shifts in markets, this project helps hospitality businesses maintain market agility, optimize advertising spend, and stay ahead of the competition.
+#### Why Automate the Pipeline?
+- **Cost Efficiency**: Reduces query costs by using a materialized table instead of repeatedly querying raw spreadsheets.
+- **Performance Optimization**: Ensures dashboards load instantly by connecting to a dedicated materialized table rather than the raw sheet.
+- **Scalability**: Handles increasing data volumes effortlessly with scheduled tasks and streamlined processing.
 
 ---
 
-**Author:** [saptayh-8910](https://github.com/saptayh-8910)  
-**Repository ID:** 1117926841
+## Data Engineering Logic
+
+The pipeline leverages BigQuery to execute scheduled transformations, materializing results into a dedicated table for quick access.
+
+### SQL Snippet for Data Transformation
+```sql
+CREATE OR REPLACE TABLE project_id.dataset.materialized_table AS
+SELECT
+    SAFE_CAST(COALESCE(raw_lead_time, '0') AS INT64) AS lead_time_bucket,
+    PARSE_DATE('%Y-%m-%d', booking_date_column) AS cleaned_booking_date
+FROM
+    project_id.dataset.raw_table;
+```
+
+#### Value of Scheduled Queries
+The pipeline runs a scheduled query (Cron job) at 6:00 AM daily, acting as a data snapshot to:
+- Track booking behavior trends day-over-day.
+- Maintain versioned snapshots for historical analysis.
+- Guarantee freshly transformed data every morning.
+
+---
+
+## Business Value
+
+By automating the pipeline to refresh data at 6:00 AM daily:
+- **Marketing Team Efficiency**: Enables the team to start their day with fresh insights, no waiting for manual processes.
+- **Enhanced Decision-Making**: Provides early signals on lead-time trends to optimize ad spend decisions immediately.
+- **Maximized ROI**: Prevents resource waste by catching booking behavior changes early.
+
+This automated solution is designed for scalability, ensuring the system performs optimally across larger datasets while delivering actionable insights to stakeholders promptly.
