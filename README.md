@@ -24,8 +24,12 @@ The solution is built as an end-to-end pipeline leveraging the following GCP ser
    - These dashboards empower stakeholders with actionable insights by visualizing lead-time trends.
 
 ### Data Flow Summary
-```
-Google Sheets → BigQuery (ETL) → Looker Studio (Visualization)
+Below is the data flow represented as a mermaid diagram:
+
+```mermaid
+graph RL
+    A[Google Sheets] --> B[BigQuery]
+    B --> C[Looker Studio]
 ```
 
 ## The 'Pivot vs. Persevere' Framework
